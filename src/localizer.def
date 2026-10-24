@@ -1,0 +1,5 @@
+LIBRARY dol-localizer-experimental
+EXPORTS
+    InstallLocalization=_InstallLocalization@4
+    DisableTranslations=_DisableTranslations@4
+    GetReplacementCount=_GetReplacementCount@4
