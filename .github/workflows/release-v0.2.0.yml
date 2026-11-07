@@ -1,0 +1,39 @@
+name: Publish v0.2.0 prerelease
+on:
+  push:
+    paths:
+      - .github/workflows/release-v0.2.0.yml
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download tested Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: DOL_translation-windows-x86
+          run-id: 42362508463
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+      - name: Verify checksum
+        working-directory: dist
+        run: sha256sum -c SHA256SUMS.txt
+      - name: Publish tested prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if gh release view v0.2.0 >/dev/null 2>&1; then
+            echo "v0.2.0 already exists; leaving it unchanged."
+            exit 0
+          fi
+          gh release create v0.2.0 dist/DOL_translation-windows-x86.zip dist/SHA256SUMS.txt \
+            --target 5534fed81060b82072c2e0305ef8cd084a352f09 \
+            --prerelease \
+            --title "v0.2.0 - Experimental quest translation" \
+            --notes "Experimental quest translation with DeepSeek or local Ollama, persistent local cache, expanded hot reload, and privacy-safe packaging. See README for setup, model downloads, limitations, and privacy notes. Tested on the supported x86 client only."
