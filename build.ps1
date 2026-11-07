@@ -1,8 +1,9 @@
-param([string]$Python = 'python', [string]$BaseDictionary = '')
+param([string]$Python = 'python', [string]$BaseDictionary = '', [string]$BuildDirectory = '')
 $ErrorActionPreference = 'Stop'
 $taskRoot = $PSScriptRoot
-$taskBin = Join-Path $taskRoot 'build\bin'
-$taskObjects = Join-Path $taskRoot 'build\obj'
+if (-not $BuildDirectory) { $BuildDirectory = Join-Path $taskRoot 'build' }
+$taskBin = Join-Path $BuildDirectory 'bin'
+$taskObjects = Join-Path $BuildDirectory 'obj'
 New-Item -ItemType Directory -Path $taskBin,$taskObjects -Force | Out-Null
 if (-not $BaseDictionary) { $BaseDictionary = Join-Path $taskRoot 'dictionaries\base.json' }
 & $Python -X utf8 "$taskRoot\tools\dictionary.py" --input $BaseDictionary --output "$taskBin\translation-dictionary.bin" --digest-header "$taskObjects\dictionary-digest.h"

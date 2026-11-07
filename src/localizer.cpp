@@ -171,6 +171,13 @@ int main() {
     bool second=false;
     for(int i=0;i<150&&!second;i++){fixture.layout(&out,source,&scale,0,1,&bounds);second=wcscmp(observed,L"第二版热更新译文")==0;if(!second)Sleep(20);}
     if(!second||wcscmp(retained,L"第一版热更新译文"))return 24;
+    for(int i=0;i<40;i++){
+        wchar_t target[64];swprintf_s(target,L"第%d版",i);
+        Sleep(30);if(!writeTestOverlay(target))return 25;
+        bool matched=false;
+        for(int j=0;j<150&&!matched;j++){fixture.layout(&out,source,&scale,0,1,&bounds);matched=wcscmp(observed,target)==0;if(!matched)Sleep(20);}
+        if(!matched || wcscmp(retained,L"第一版热更新译文"))return 26;
+    }
     printf("PASS live overlay reload and retained string lifetime verified\n");
 #endif
     if(MH_DisableHook(target)!=MH_OK || MH_Uninitialize()!=MH_OK)return 16;

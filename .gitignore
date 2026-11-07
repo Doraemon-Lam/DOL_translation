@@ -20,3 +20,6 @@ runtime-status.json
 /dictionaries/user*.json
 /.venv/
 /.vs/
+/deepseek.key.protected
+/build-next/
+/dictionaries/supplement-000-auto.json
