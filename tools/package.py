@@ -11,12 +11,13 @@ def main():
     pairs=[]
     for name in ('dol-localizer-experimental.dll','localizer-loader.exe','translation-dictionary.bin','manifest.json'):
         pairs.append((ROOT/'build/bin'/name,'bin/'+name))
-    for name in ('README.md','LICENSE','THIRD_PARTY_NOTICES.md','加载汉化.cmd','停用汉化.cmd','更新词库.cmd','启动任务自动翻译.cmd','设置DeepSeek密钥.cmd'):
+    for name in ('README.md','LICENSE','THIRD_PARTY_NOTICES.md','加载汉化.cmd','停用汉化.cmd','更新词库.cmd','启动任务自动翻译.cmd','设置DeepSeek密钥.cmd','启动剧情字幕.cmd','剧情字幕使用说明.md'):
         pairs.append((ROOT/name,name))
     for name in ('Load.ps1','Update.ps1','SetDeepSeekKey.ps1'):pairs.append((ROOT/'scripts'/name,'scripts/'+name))
     pairs.append((ROOT/'tools/dictionary.py','tools/dictionary.py'))
     pairs.append((ROOT/'tools/auto_quest.py','tools/auto_quest.py'))
-    for name in ('base.json','supplement-001.json','supplement-002.json','supplement-003.json','supplement-004.json'):
+    pairs.append((ROOT/'tools/story_subtitles.py','tools/story_subtitles.py'))
+    for name in ('base.json','supplement-000-0shared-auto.json','supplement-000-0shared-story.json','supplement-001.json','supplement-002.json','supplement-003.json','supplement-004.json'):
         pairs.append((ROOT/'dictionaries'/name,'dictionaries/'+name))
     for name in ('LICENSE.txt','AUTHORS.txt'):
         pairs.append((ROOT/'third_party/minhook'/name,'third_party/minhook/'+name))
@@ -26,7 +27,7 @@ def main():
     target=folder/'DOL_translation-windows-x86.zip'
     with tempfile.TemporaryDirectory() as temp:
         clean_overlay=Path(temp)/'live-overlay.bin'
-        public_supplements=[ROOT/'dictionaries'/f'supplement-{i:03}.json' for i in range(1,5)]
+        public_supplements=[ROOT/'dictionaries'/name for name in ('supplement-000-0shared-auto.json','supplement-000-0shared-story.json','supplement-001.json','supplement-002.json','supplement-003.json','supplement-004.json')]
         compile_dictionary(public_supplements,clean_overlay,variants=True,overlay=True)
         with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as archive:
             for source,name in pairs:archive.write(source,'DOL_translation/'+name)
