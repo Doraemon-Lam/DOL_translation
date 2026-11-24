@@ -45,7 +45,7 @@ def candidate(text):
     return len(text) >= 40 and text.count('\n') >= 2 and bool(re.search(r'[\u3041-\u3096\u30a1-\u30fa]', text))
 
 
-def translate(text, key='', provider='deepseek'):
+def translate(text, key='', provider='deepseek', on_usage=None):
     glossary = {'サンフアン': '圣胡安', 'リスボン': '里斯本', 'ロンドン': '伦敦', 'アゾレス': '亚速尔群岛', '交易所': '交易所', '海事ギルド': '海事公会', 'ナポリ': '那不勒斯', '王宮': '王宫'}
     terms = '，'.join(k + '=' + v for k, v in glossary.items() if k in text.replace('\n', ''))
     messages = [{'role': 'system', 'content': '你是大航海时代Online的日中翻译。将用户给出的任务准确翻译成简体中文，只输出译文，保留地名、人名和数字，不要解释。所有数字必须原样使用阿拉伯数字，不能转成汉字。交易所店主=交易所老板。' + terms},
@@ -74,6 +74,8 @@ def translate(text, key='', provider='deepseek'):
     with urllib.request.urlopen(request, timeout=90) as response:
         result = json.load(response)
     if provider == 'deepseek':
+        if on_usage is not None:
+            on_usage(result.get('usage'))
         choice = result['choices'][0]
         answer = (choice.get('message', {}).get('content') or '').strip()
         finished = choice.get('finish_reason') == 'stop'

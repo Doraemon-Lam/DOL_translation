@@ -11,12 +11,13 @@ def main():
     pairs=[]
     for name in ('dol-localizer-experimental.dll','localizer-loader.exe','translation-dictionary.bin','manifest.json'):
         pairs.append((ROOT/'build/bin'/name,'bin/'+name))
-    for name in ('README.md','LICENSE','THIRD_PARTY_NOTICES.md','加载汉化.cmd','停用汉化.cmd','更新词库.cmd','启动任务自动翻译.cmd','设置DeepSeek密钥.cmd','启动剧情字幕.cmd','剧情字幕使用说明.md'):
+    for name in ('README.md','LICENSE','THIRD_PARTY_NOTICES.md','剧情字幕使用说明.md','启动翻译中心.cmd'):
         pairs.append((ROOT/name,name))
     for name in ('Load.ps1','Update.ps1','SetDeepSeekKey.ps1'):pairs.append((ROOT/'scripts'/name,'scripts/'+name))
     pairs.append((ROOT/'tools/dictionary.py','tools/dictionary.py'))
     pairs.append((ROOT/'tools/auto_quest.py','tools/auto_quest.py'))
     pairs.append((ROOT/'tools/story_subtitles.py','tools/story_subtitles.py'))
+    pairs.append((ROOT/'tools/translation_hub.py','tools/translation_hub.py'))
     for name in ('base.json','supplement-000-0shared-auto.json','supplement-000-0shared-story.json','supplement-001.json','supplement-002.json','supplement-003.json','supplement-004.json'):
         pairs.append((ROOT/'dictionaries'/name,'dictionaries/'+name))
     for name in ('LICENSE.txt','AUTHORS.txt'):
