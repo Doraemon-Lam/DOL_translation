@@ -36,6 +36,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Native test compilation failed' }
     & "$taskBin\localizer-selftest.exe"
     if ($LASTEXITCODE -ne 0) { throw "Native ABI/log/overlay tests failed: $LASTEXITCODE" }
+    # The native self-test overwrites the live overlay with test fixtures.
+    & $Python -X utf8 "$taskRoot\tools\dictionary.py" --input @taskSupplements --output "$taskBin\live-overlay.bin" --variants --overlay
+    if ($LASTEXITCODE -ne 0) { throw 'Overlay restoration after self-test failed' }
     & $taskCompiler @taskFlags /O2 /LD "$taskRoot\src\localizer.cpp" @taskObjectFiles "/Fe$taskBin\dol-localizer-experimental.dll" /link /MACHINE:X86 bcrypt.lib "/DEF:$taskRoot\src\localizer.def"
     if ($LASTEXITCODE -ne 0) { throw 'DLL compilation failed' }
     & $taskCompiler /nologo /W4 /EHsc /std:c++17 /utf-8 /O2 /MT "$taskRoot\src\loader.cpp" "/Fe$taskBin\localizer-loader.exe" /link /MACHINE:X86

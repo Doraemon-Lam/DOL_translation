@@ -2,6 +2,7 @@
 import html
 import json
 import os
+import sys
 import queue
 import re
 import threading
@@ -13,7 +14,7 @@ import urllib.request
 from auto_quest import load_key
 from dictionary import compile_dictionary
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(sys.executable).resolve().parent if getattr(sys, 'frozen', False) else Path(__file__).resolve().parent.parent
 LOG_DIR = Path(os.environ.get('USERPROFILE', str(Path.home()))) / 'Documents' / 'KOEI' / 'GV Online' / 'Log' / 'Chat'
 CACHE_PATH = ROOT / 'dictionaries' / 'supplement-000-story.json'
 STATS_PATH = ROOT / 'userdata' / 'story-usage.json'

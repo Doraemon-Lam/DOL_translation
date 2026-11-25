@@ -7,10 +7,10 @@ from pathlib import Path
 from dictionary import compile_dictionary
 
 ROOT=Path(__file__).resolve().parents[1]
-def main():
+def main(build_bin=None):
     pairs=[]
     for name in ('dol-localizer-experimental.dll','localizer-loader.exe','translation-dictionary.bin','manifest.json'):
-        pairs.append((ROOT/'build/bin'/name,'bin/'+name))
+        pairs.append(((build_bin or ROOT/'build/bin')/name,'bin/'+name))
     for name in ('README.md','LICENSE','THIRD_PARTY_NOTICES.md','剧情字幕使用说明.md','启动翻译中心.cmd'):
         pairs.append((ROOT/name,name))
     for name in ('Load.ps1','Update.ps1','SetDeepSeekKey.ps1'):pairs.append((ROOT/'scripts'/name,'scripts/'+name))

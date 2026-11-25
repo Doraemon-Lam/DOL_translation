@@ -13,7 +13,7 @@ from pathlib import Path
 
 from dictionary import compile_dictionary, load
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(sys.executable).resolve().parent if getattr(sys, 'frozen', False) else Path(__file__).resolve().parent.parent
 BIN = ROOT / 'bin' if (ROOT / 'bin' / 'manifest.json').is_file() else ROOT / 'build' / 'bin'
 LOG = BIN / 'missing-text.jsonl'
 CACHE = ROOT / 'dictionaries' / 'supplement-000-auto.json'
