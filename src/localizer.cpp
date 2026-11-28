@@ -24,17 +24,17 @@ static const Pair pairs[]={
     {L"断る",L"拒绝"}
 };
 
-static const wchar_t* translate(const wchar_t* text) {
+static const wchar_t* translate(const wchar_t* text,const void* context=nullptr) {
     if(!text || !InterlockedCompareExchange(&enabled,0,0))return text;
     for(const auto& p:pairs)if(wcscmp(text,p.source)==0){InterlockedIncrement(&replacements);return p.target;}
 #ifdef FULL_DICTIONARY
-    const wchar_t* translated=full_dictionary::lookup(text);
+    const wchar_t* translated=full_dictionary::lookup(text,context);
     if(translated){InterlockedIncrement(&replacements);return translated;}
 #endif
     return text;
 }
 static SIZE* __fastcall layoutHook(void* self,void*,SIZE* out,const wchar_t* text,const SIZE* scale,DWORD color,int lineHeight,const SIZE* bounds) {
-    return originalLayout(self,out,translate(text),scale,color,lineHeight,bounds);
+    return originalLayout(self,out,translate(text,self),scale,color,lineHeight,bounds);
 }
 
 static DWORD installAt(void* target) {
@@ -123,6 +123,35 @@ int main() {
     if(!full_dictionary::initialize(GetModuleHandleW(nullptr)))return 17;
     if(full_dictionary::entries.empty())return 18;
     full_dictionary::entries.emplace(L"これは辞書の実験です",L"这是词库替换实验");
+#endif
+#ifdef LIVE_OVERLAY
+    {
+        live_overlay::Map saved; saved.swap(live_overlay::current);
+        const wchar_t* whole=L"クエスト「ポルトガル領内の交易計画情報」の次の目標はマディラの交易所店主です。";
+        const wchar_t* prefix=L"クエスト「ポルトガル領内の交易計画情報」の次の目標はマディラの交易所店";
+        const wchar_t* chinese=L"任务「葡萄牙领地内的交易计划情报」的下一个目标是马德拉的交易所店主。";
+        live_overlay::current.emplace(whole,chinese);
+        if(live_overlay::lookup(L"主です。"))return 30;
+        const wchar_t* first=live_overlay::lookup(prefix,reinterpret_cast<void*>(1));if(!first)return 31;
+        const wchar_t* last=live_overlay::lookup(L"主です。",reinterpret_cast<void*>(1));if(!last || std::wstring(first)+last!=chinese)return 32;
+        if(!live_overlay::lookup(prefix,reinterpret_cast<void*>(1)))return 33;
+        if(live_overlay::lookup(L"主です。",reinterpret_cast<void*>(2)))return 34;
+        live_overlay::current.emplace(std::wstring(prefix)+L"別の文章",L"另一条译文");
+        if(live_overlay::lookup(prefix))return 35;
+        live_overlay::current.clear();
+        const std::wstring member=L"あなたは現在シルバーPlus会員です。受けられるステージ特典は、アカウント情報画面で確認できます";
+        const std::wstring memberTarget=L"您现在是白银Plus会员。可享受的关卡特权可在账户信息界面确认。";
+        const std::wstring tail=L"情報画面で確認できます";
+        live_overlay::current.emplace(member,memberTarget.c_str());
+        const wchar_t* tailFirst=live_overlay::lookup(tail.c_str());if(!tailFirst)return 36;
+        std::wstring head=member.substr(0,member.size()-tail.size());
+        const wchar_t* headSecond=live_overlay::lookup(head.c_str());
+        if(!headSecond || std::wstring(headSecond)+tailFirst!=memberTarget)return 37;
+        live_overlay::current.emplace(L"別のアカウント情報画面で確認できます",L"另一条信息");
+        if(live_overlay::lookup(tail.c_str(),reinterpret_cast<void*>(3)))return 38;
+        live_overlay::current.swap(saved);
+        printf("PASS contextual wrapped matching, complete translation, short suffix isolation and ambiguity rejection\n");
+    }
 #endif
     Fixture fixture;auto method=&Fixture::layout;void* target=nullptr;
     static_assert(sizeof(method)==sizeof(target),"Fixture member pointer must be a single x86 code address");

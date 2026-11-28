@@ -1,6 +1,8 @@
 # DOL_translation
 
-普通用户请从 [Releases](https://github.com/Doraemon-Lam/DOL_translation/releases/latest) 下载 **DOL-Translation-portable.zip**，解压整个文件夹后双击 **DOL-Translation.exe**。无需安装 Python 或编译环境。首次使用设置 API 密钥，登录游戏后点击“加载游戏汉化”并开始监听。此运行包适用于 64 位 Windows，内含游戏所需的 x86 DLL。GitHub 的 Download ZIP / Source code 是开发源码，需要自行构建。
+最新版：**v0.3.1**。请在 [Releases](https://github.com/Doraemon-Lam/DOL_translation/releases/latest) 下载 **DOL-Translation-portable.zip**，完整解压后双击 **DOL-Translation.exe**。支持 64 位 Windows，无需安装 Python 或编译环境；游戏 DLL 为 x86。Source code / Download ZIP 仅为源码。
+
+此版修复聊天自动折行匹配，支持唯一长尾段先于首行出现。更新后必须退出游戏再重新启动和加载汉化；旧版用户可复制 dictionaries、userdata 和 deepseek.key.protected 保留本机数据。短尾段或歧义片段仍可能漏译，中文断行按长度分配。
 
 《大航海时代 Online》日服的实验性原位中文替换工具。直接在游戏生成字形前替换文本，不依赖 OCR。支持任务自动翻译，以及从游戏聊天日志读取剧情、显示翻译字幕和积累词库。
 
@@ -135,3 +137,5 @@ docs/architecture.md  调用路径、文件格式与限制
 使用 `DOL-Translation-portable.zip`：解压整个文件夹，双击 `DOL-Translation.exe`。用户无需安装 Python、Visual Studio 或运行 build.ps1。首次使用设置密钥；登录游戏后点击“加载游戏汉化”并确认权限，再开始监听。每次重启游戏后需重新加载汉化。请保留 EXE 旁的 _internal、bin、scripts 和 dictionaries 文件夹。
 
 开发者生成运行包：安装 Python、Visual Studio C++ 工具及 Windows SDK，执行 `python -m pip install pyinstaller`，再执行 `python tools/package_exe.py`。打包只包含明确列出的公开词库，不携带本机密钥、日志或私人缓存。当前 EXE 使用构建机器的 Python 架构，游戏汉化 DLL 始终为 x86。
+
+本次更新按用户要求公开了本机任务/剧情翻译缓存和游戏日志快照；翻译合并到共享词库，日志位于 published-data。可能含玩家名称及聊天内容。

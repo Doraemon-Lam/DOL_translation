@@ -24,3 +24,6 @@ runtime-status.json
 /build-next/
 /dictionaries/supplement-000-auto.json
 /dictionaries/supplement-000-story.json
+
+# Explicitly authorized published log snapshot
+!published-data/missing-text.jsonl

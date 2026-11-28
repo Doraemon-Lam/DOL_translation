@@ -1,4 +1,5 @@
 """Build a portable Windows app; end users need no Python or compiler."""
+import hashlib
 import os
 import shutil
 import subprocess
@@ -26,6 +27,9 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(archive.read(member))
     shutil.make_archive(str(ROOT / 'dist/DOL-Translation-portable'), 'zip', app.parent, app.name)
+    portable = ROOT / 'dist/DOL-Translation-portable.zip'
+    with (ROOT / 'dist/SHA256SUMS.txt').open('a', encoding='ascii') as stream:
+        stream.write(hashlib.sha256(portable.read_bytes()).hexdigest() + '  ' + portable.name + '\n')
     print('Portable EXE package: ' + str(ROOT / 'dist/DOL-Translation-portable.zip'))
 
 if __name__ == '__main__':

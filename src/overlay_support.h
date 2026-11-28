@@ -53,9 +53,63 @@ static void refresh() {
     AcquireSRWLockExclusive(&mapLock);current.swap(next);ReleaseSRWLockExclusive(&mapLock);
     stamp=attributes.ftLastWriteTime;
 }
-static const wchar_t* lookup(const wchar_t* text) {
+// Wrapped text is matched only as an ordered partition of one known source.
+// Short suffixes are never installed as global dictionary keys.
+static std::set<std::wstring> fragmentRetained;
+static size_t fragmentUnits=0;
+static const wchar_t* lookup(const wchar_t* text, const void* context=nullptr) {
+    struct Pending {std::wstring source,target;const void* owner=nullptr;ULONGLONG until=0;};
+    static thread_local Pending pending;
+    const size_t length=wcslen(text);
+    std::wstring source,target;
     AcquireSRWLockShared(&mapLock);
-    auto entry=current.find(text);const wchar_t* value=entry==current.end()?nullptr:entry->second;
-    ReleaseSRWLockShared(&mapLock);return value;
+    auto entry=current.find(text);
+    const wchar_t* exact=entry==current.end()?nullptr:entry->second;
+    if(exact){ReleaseSRWLockShared(&mapLock);pending=Pending{};return exact;}
+    if(pending.owner==context && GetTickCount64()<pending.until && !pending.source.empty()
+        && length<=pending.source.size() && pending.source.compare(0,length,text)==0){
+        source=pending.source;target=pending.target;
+    } else if(length>=16) {
+        // Reject ambiguous prefixes, including two entries with different tails.
+        auto first=current.lower_bound(text);
+        if(first!=current.end() && first->first.size()>length && first->first.compare(0,length,text)==0){
+            auto next=first;++next;
+            if(next==current.end() || next->first.compare(0,length,text)!=0){source=first->first;target=first->second;}
+        }
+    }
+    // Some layout paths measure/render the final line before the first line.
+    // Accept a standalone long suffix only when its whole source is unique.
+    if(source.empty() && length>=8){
+        const Map::value_type* match=nullptr;
+        for(const auto& item:current){
+            if(item.first[0]==L'\xff1a' || item.first.size()<=length)continue;
+            if(item.first.compare(item.first.size()-length,length,text)!=0)continue;
+            if(match){match=nullptr;break;}
+            match=&item;
+        }
+        if(match){
+            const std::wstring fullTarget=match->second;
+            size_t begin=fullTarget.size()*(match->first.size()-length)/match->first.size();
+            if(begin && begin<fullTarget.size() && fullTarget[begin-1]>=0xd800 && fullTarget[begin-1]<=0xdbff)--begin;
+            source=text;target=fullTarget.substr(begin);
+        }
+    }
+    ReleaseSRWLockShared(&mapLock);
+    if(source.empty()){pending=Pending{};return nullptr;}
+    size_t cut=length==source.size()?target.size():target.size()*length/source.size();
+    if(cut==0 || cut>target.size()){pending=Pending{};return nullptr;}
+    // Never cut a UTF-16 surrogate pair in half.
+    if(cut<target.size() && target[cut-1]>=0xd800 && target[cut-1]<=0xdbff)--cut;
+    if(!cut){pending=Pending{};return nullptr;}
+    std::wstring part=target.substr(0,cut);
+    pending.source=source.substr(length);pending.target=target.substr(cut);
+    pending.owner=context;pending.until=GetTickCount64()+2000;
+    AcquireSRWLockExclusive(&mapLock);
+    const wchar_t* value=nullptr;
+    if(fragmentUnits+part.size()+1<=1024*1024){
+        auto saved=fragmentRetained.emplace(part);if(saved.second)fragmentUnits+=part.size()+1;
+        value=saved.first->c_str();
+    }
+    ReleaseSRWLockExclusive(&mapLock);return value;
 }
 }

@@ -117,9 +117,9 @@ static bool initialize(HMODULE module) {
 #endif
     return true;
 }
-static const wchar_t* lookup(const wchar_t* text) {
+static const wchar_t* lookup(const wchar_t* text,const void* context=nullptr) {
 #ifdef LIVE_OVERLAY
-    const wchar_t* live=live_overlay::lookup(text);if(live)return live;
+    const wchar_t* live=live_overlay::lookup(text,context);if(live)return live;
 #endif
     auto found=entries.find(text);
     if(found!=entries.end())return found->second.c_str();
